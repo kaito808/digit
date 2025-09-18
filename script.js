@@ -6,6 +6,8 @@
   const counters = document.querySelectorAll('.counter');
   const contactForm = document.querySelector('.contact-form');
   const feedbackEl = document.querySelector('.form-feedback');
+  const hero = document.querySelector('.hero');
+  const heroVisual = document.querySelector('.hero-visual');
 
   const setYear = () => {
     const yearEl = document.getElementById('current-year');
@@ -122,11 +124,66 @@
     });
   };
 
+  const initHeroParallax = () => {
+    if (!hero || !heroVisual) return;
+    const pointerFine = window.matchMedia('(pointer: fine)');
+    if (!pointerFine.matches) return;
+
+    const maxTiltX = 10;
+    const maxTiltY = 8;
+    const maxShift = 16;
+    let rect = heroVisual.getBoundingClientRect();
+    let rafId = null;
+
+    const updateRect = () => {
+      rect = heroVisual.getBoundingClientRect();
+    };
+
+    const applyTilt = (xRatio, yRatio) => {
+      heroVisual.style.setProperty('--tilt-x', `${xRatio * maxTiltX}deg`);
+      heroVisual.style.setProperty('--tilt-y', `${-yRatio * maxTiltY}deg`);
+      heroVisual.style.setProperty('--tilt-tr-x', `${xRatio * maxShift}px`);
+      heroVisual.style.setProperty('--tilt-tr-y', `${yRatio * maxShift}px`);
+    };
+
+    const resetTilt = () => {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+      applyTilt(0, 0);
+    };
+
+    const handlePointerMove = (event) => {
+      if (!rect.width || !rect.height) return;
+      const x = (event.clientX - (rect.left + rect.width / 2)) / rect.width;
+      const y = (event.clientY - (rect.top + rect.height / 2)) / rect.height;
+
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        applyTilt(Math.max(-1, Math.min(1, x)) * 1.1, Math.max(-1, Math.min(1, y)) * 1.1);
+      });
+    };
+
+    updateRect();
+    resetTilt();
+
+    hero.addEventListener('mouseenter', updateRect);
+    hero.addEventListener('mousemove', handlePointerMove);
+    hero.addEventListener('mouseleave', resetTilt);
+    window.addEventListener('resize', () => {
+      updateRect();
+      resetTilt();
+    });
+    window.addEventListener('scroll', updateRect, { passive: true });
+  };
+
   const init = () => {
     setYear();
     animateCounters();
     enhanceAnchorLinks();
     handleFormSubmit();
+    initHeroParallax();
 
     menuToggle?.addEventListener('click', toggleNav);
     backToTop?.addEventListener('click', (event) => {
