@@ -147,6 +147,7 @@
       heroVisual.style.setProperty('--tilt-y', `${-yRatio * maxTiltY}deg`);
       heroVisual.style.setProperty('--tilt-tr-x', `${xRatio * maxShift}px`);
       heroVisual.style.setProperty('--tilt-tr-y', `${yRatio * maxShift}px`);
+      heroVisual.style.setProperty('--earth-spin', `${xRatio * 20}deg`);
 
       if (supportsLayerTranslate) {
         layers.forEach((layer) => {
@@ -164,6 +165,7 @@
         rafId = null;
       }
       applyTilt(0, 0);
+      heroVisual.style.setProperty('--earth-spin', '0deg');
       if (supportsLayerTranslate) {
         layers.forEach((layer) => {
           layer.style.translate = '0px 0px';
